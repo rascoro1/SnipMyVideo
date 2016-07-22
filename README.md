@@ -6,7 +6,7 @@ Every had a video that was very long and all you wanted to do was really shorten
   
 How does snipmyvideo.py work?
 
-  usage: snipmyvideo.py video.mp4 output.mp4 30-60 90-120
+        usage: snipmyvideo.py video.mp4 output.mp4 30-60 90-120
   
     E.g: This command would create two snipets (unlimited snipets can be created),
     
