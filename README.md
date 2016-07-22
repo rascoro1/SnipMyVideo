@@ -10,7 +10,7 @@ How does snipmyvideo.py work?
   
     E.g: This command would create two snipets (unlimited snipets can be created),
     
-        the first snipet resembles the time 30seconds to 60 seconds from video.m94
+        the first snipet resembles the time 30seconds to 60 seconds from video.mp4
         
         These snipets are then concatenated and written to output.mp4
         
