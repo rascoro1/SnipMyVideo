@@ -64,25 +64,33 @@ def convert_to_sec(inp_list):
     elif len(inp_list) == 2:
         return int(inp_list[0]) * 60 + int(inp_list[1])
     elif len(inp_list) == 3:
-        return int(inp_list[0]) * 3600 + int(inp_list[1]) * 60 + int(inp_list[0])
+        return int(inp_list[0]) * 3600 + int(inp_list[1]) * 60 + int(inp_list[2])
 
 
 def get_snipets():
+    """
+    Input: list of str of time range in format of sec, min:sec, or hour:min:sec
+    Process: each value from input list becomes start and stop time in seconds as int
+    Output: list of objects of VideoFileClip.subclip(start, stop)
+    """
     snipets = []
-    # e.g.: ['6-12:06', '12:10-12:30']
+    # e.g. input: ['6-12:06', '12:10-12:30', '0:50:22-1:10:0']
     # iterate through each input time range / snipet
     for arg in ARGS:
         if '-' in arg:
             time = [[x] for x in arg.split('-', 1)] # '6-12:06' => [['6'], ['12:06']]
             if len(time) != 2:
-                print('Input needs to contain "-" character to indicate time range for input video, see README.md')
+                print('Input needs to contain start & stop times with \'-\' between to indicate time range for input video, see README.md')
                 sys.exit(7)
 
             # iterate through start then stop times
             for index in range(len(time)):
                 if ':' in time[index][0]:
-                    time[index] = time[index][0].split(':', 1) # [['6'], ['12:06']] => [['6'], ['12', '06']]
-                    # print(time[index]) # debug
+                    if time[index].count(':') > 2:
+                        print('There shouldn\'t be more than 2 \':\' per start or stop time entered.')
+                        sys.exit(8)
+                    time[index] = time[index][0].split(':') # [['6'], ['12:06']] => [['6'], ['12', '06']]
+                    # print('time[%s] after ":" split: %s' % (index, time[index])) # debug
                 # check to see if snippets are valid
                 for value in time[index]:
                     if not value.isdigit():
@@ -93,21 +101,20 @@ def get_snipets():
                         sys.exit(5)
                 # convert to seconds
                 time[index] = convert_to_sec(time[index]) # [['6'], ['12', '06']] => [6, 726]
-                # print(time[index]) # debug
+                # print('time[%s] after sec conversion: %s' % (index, time[index])) # debug
 
             start, stop = time[0], time[1]
             if start > stop:
                 print('Start needs to be smaller than stop for snipet #%s, exiting.' % (index))
                 sys.exit(6)
             snipets.append(VideoFileClip(FNAME).subclip(int(start), int(stop)))
-            print "Created Snippet:\n\tStarting: %s STOPPING: %s " % (start, stop)
+            # print "Created Snippet:\n\tStarting: %s STOPPING: %s " % (start, stop) # debug
 
         elif '-' not in arg:
-            print('Input needs to contain "-" to indicate time range for input video, see README.md')
+            print('Input needs to contain \'-\' to indicate time range for input video, see README.md')
             sys.exit(7)
 
-        return snipets
-
+    return snipets
 
 def create_viedo(snipets):
     video = concatenate(snipets)
