@@ -1,4 +1,5 @@
 from moviepy.editor import *
+from moviepy import Clip
 
 import sys
 import os
@@ -29,10 +30,11 @@ Only a couple lines actually using moviepy.
 ###################### Declaring Globals ##################################
 SCRIPT_NAME = "" # Name of the script
 FNAME = "" # Input filename
-OUT_FNAME = "" # OUtput filename
+OUT_FNAME = "" # Output filename
 SNIPPETS = [] # Raw Snippet times given as arguments by the user
 SNIPPET_TIMES = [] # Snippet times in seconds
 VERBOSE = True # Turn to false if you would not like verbose information
+IS_AUDIO_FILE = False
 
 def check_num_of_arguments():
     """
@@ -78,8 +80,6 @@ def check_args():
 
     if not os.path.isdir(os.path.abspath(OUT_FNAME).rstrip(os.path.basename(OUT_FNAME))):
         print "Output file directory does not exists"
-
-
         sys.exit(3)
 
 def check_time(time, min, max):
@@ -175,14 +175,22 @@ def get_all_snippet_times():
 
         SNIPPET_TIMES.append(snippet)
 
+def determine_if_audio_file():
+    """
+    """
+    global IS_AUDIO_FILE
+    audio_file_extensions = (".mp3", ".m4a")
+    IS_AUDIO_FILE = True if FNAME.endswith(audio_file_extensions) else False
+
 def get_snippets():
     """
 
     :return: List of moviepy.subclip objects
     """
     snippets = []
+    clip = AudioFileClip(FNAME) if IS_AUDIO_FILE else VideoFileClip(FNAME)
     for snippet in SNIPPET_TIMES:
-        snippets.append(VideoFileClip(FNAME).subclip(snippet['start'], snippet['stop']))
+        snippets.append(clip.subclip(snippet['start'], snippet['stop']))
         print "Created Snippet:\n\tStarting: " + str(snippet['start']) + " STOPPING: " + str(snippet['stop'])
 
     return snippets
@@ -193,10 +201,16 @@ def create_video(snippets):
     :param snippets: THis is a list of moviepy.subclip
     :return: write out one file
     """
-    video = concatenate(snippets)
-    print "Combined Snipets into one Video"
-    print "Writing Video to " + OUT_FNAME
-    video.write_videofile(OUT_FNAME)
+    if not IS_AUDIO_FILE:
+        video = concatenate(snippets)
+        print "Combined Snipets into one Video"
+        print "Writing Video to " + OUT_FNAME
+        video.write_videofile(OUT_FNAME)
+    else:
+        audio = concatenate_audioclips(snippets)
+        print "Combined Snipets into one Audio File"
+        print "Writing Video to " + OUT_FNAME
+        audio.write_audiofile(OUT_FNAME)
 
 
 def verbose(title, info):
@@ -216,7 +230,6 @@ if __name__ == "__main__":
     trim_arguments() # Trim the args to just have the snippets at the end
     check_args() # check the args for correctness
     get_all_snippet_times() # All snippet times in seconds and organized Also checked for correctness
+    determine_if_audio_file()
     snippets = get_snippets() # Get all the moviepy.subclip objects for each snippet
     create_video(snippets) # Concatinate the Snippets together
-
-
