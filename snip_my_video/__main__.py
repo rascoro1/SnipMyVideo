@@ -225,11 +225,15 @@ def verbose(title, info):
         print SCRIPT_NAME + " -> " + str(title) + ": " + info
 
 
-if __name__ == "__main__":
-    check_num_of_arguments() # Make sure we have the correct number of arguments
-    trim_arguments() # Trim the args to just have the snippets at the end
-    check_args() # check the args for correctness
-    get_all_snippet_times() # All snippet times in seconds and organized Also checked for correctness
+def run():
+    check_num_of_arguments()  # Make sure we have the correct number of arguments
+    trim_arguments()  # Trim the args to just have the snippets at the end
+    check_args()  # check the args for correctness
+    get_all_snippet_times()  # All snippet times in seconds and organized Also checked for correctness
     determine_if_audio_file()
-    snippets = get_snippets() # Get all the moviepy.subclip objects for each snippet
-    create_video(snippets) # Concatinate the Snippets together
+    snippets = get_snippets()  # Get all the moviepy.subclip objects for each snippet
+    create_video(snippets)  # Concatinate the Snippets together
+
+
+if __name__ == "__main__":
+    run()
