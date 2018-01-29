@@ -43,9 +43,9 @@ def check_num_of_arguments():
     :return:
     """
     if len(sys.argv) < 4:
-        print "You have not given enough Arguments"
-        print "usage: " + sys.argv[0] + " inputfile.mp4 outputfile.mp4 20-30"
-        print "Time is in seconds"
+        print("You have not given enough Arguments")
+        print("usage: " + sys.argv[0] + " inputfile.mp4 outputfile.mp4 20-30")
+        print("Time is in seconds")
         sys.exit(6)
 
 
@@ -71,15 +71,15 @@ def check_args():
 
     """
     if not os.path.isfile(FNAME):
-        print "The Input file does not exist."
+        print("The Input file does not exist.")
         sys.exit(1)
 
     if os.path.isfile(OUT_FNAME):
-        print "Output file already exists"
+        print("Output file already exists")
         sys.exit(2)
 
     if not os.path.isdir(os.path.abspath(OUT_FNAME).rstrip(os.path.basename(OUT_FNAME))):
-        print "Output file directory does not exists"
+        print("Output file directory does not exists")
         sys.exit(3)
 
 def check_time(time, min, max):
@@ -111,7 +111,7 @@ def convert_human_readable_time(time):
                 verbose("convert_human_readable_time(" + str(time) + ")", "time = " + str(min) + " * 60 + " + sec)
                 time = int(min) * 60 + int(sec)
             else:
-                print("Incorrect Time has been submitted: " + str(time) + " min:sec 0:0-59:60")
+                print(("Incorrect Time has been submitted: " + str(time) + " min:sec 0:0-59:60"))
                 sys.exit(10)
 
         elif len(time) == 3:  # Hour:Min:Sec format
@@ -121,14 +121,14 @@ def convert_human_readable_time(time):
                 verbose("convert_human_readable_time(" + str(time) + ")", "time = " + str(hour) + " * 3600 + " + str(min) + " * 60 + " + sec)
                 time = int(hour) * 3600 + int(min) * 60 + int(sec)
             else:
-                print("Incorrect Time has been submitted: " + str(time) + " hour:min:sec 0:0:0-23:59:59")
+                print(("Incorrect Time has been submitted: " + str(time) + " hour:min:sec 0:0:0-23:59:59"))
                 sys.exit(10)
 
 
     try:
         time = int(time)
     except ValueError as e:
-        print "Value Error: Given time is not a digit" + e.message
+        print("Value Error: Given time is not a digit" + e.message)
         sys.exit(8)
 
     verbose("convert_human_readable_time(" + str(time) + ")", "Returned time is -> " + str(time))
@@ -145,7 +145,7 @@ def get_snippet_time(snippet):
     :return: Dict of snippet e.g. {'start':20, 'stop': 40}
     """
     if "-" not in snippet: # Checking to see if snippet time was inputted correctly
-        print("The arguments for the snippet time is not in the correct format: " + snippet)
+        print(("The arguments for the snippet time is not in the correct format: " + snippet))
         print("Correct usage is: 20-30 or 20:30-20:35 or 1:20:30-1:20:35 ")
         sys.exit(7)
 
@@ -165,7 +165,7 @@ def get_all_snippet_times():
         snippet = get_snippet_time(snippet)
         for key in snippet:
             if snippet[key] < 0:
-                print "Input must be a positive number"
+                print("Input must be a positive number")
                 sys.exit(5)
 
         if snippet['start'] > snippet['stop']:
@@ -191,7 +191,7 @@ def get_snippets():
     clip = AudioFileClip(FNAME) if IS_AUDIO_FILE else VideoFileClip(FNAME)
     for snippet in SNIPPET_TIMES:
         snippets.append(clip.subclip(snippet['start'], snippet['stop']))
-        print "Created Snippet:\n\tStarting: " + str(snippet['start']) + " STOPPING: " + str(snippet['stop'])
+        print("Created Snippet:\n\tStarting: " + str(snippet['start']) + " STOPPING: " + str(snippet['stop']))
 
     return snippets
 
@@ -203,13 +203,13 @@ def create_video(snippets):
     """
     if not IS_AUDIO_FILE:
         video = concatenate(snippets)
-        print "Combined Snipets into one Video"
-        print "Writing Video to " + OUT_FNAME
+        print("Combined Snipets into one Video")
+        print("Writing Video to " + OUT_FNAME)
         video.write_videofile(OUT_FNAME)
     else:
         audio = concatenate_audioclips(snippets)
-        print "Combined Snipets into one Audio File"
-        print "Writing Video to " + OUT_FNAME
+        print("Combined Snipets into one Audio File")
+        print("Writing Video to " + OUT_FNAME)
         audio.write_audiofile(OUT_FNAME)
 
 
@@ -222,14 +222,18 @@ def verbose(title, info):
     :return:
     """
     if VERBOSE:
-        print SCRIPT_NAME + " -> " + str(title) + ": " + info
+        print(SCRIPT_NAME + " -> " + str(title) + ": " + info)
+
+
+def run():
+    check_num_of_arguments()  # Make sure we have the correct number of arguments
+    trim_arguments()  # Trim the args to just have the snippets at the end
+    check_args()  # check the args for correctness
+    get_all_snippet_times()  # All snippet times in seconds and organized Also checked for correctness
+    determine_if_audio_file()
+    snippets = get_snippets()  # Get all the moviepy.subclip objects for each snippet
+    create_video(snippets)  # Concatinate the Snippets together
 
 
 if __name__ == "__main__":
-    check_num_of_arguments() # Make sure we have the correct number of arguments
-    trim_arguments() # Trim the args to just have the snippets at the end
-    check_args() # check the args for correctness
-    get_all_snippet_times() # All snippet times in seconds and organized Also checked for correctness
-    determine_if_audio_file()
-    snippets = get_snippets() # Get all the moviepy.subclip objects for each snippet
-    create_video(snippets) # Concatinate the Snippets together
+    run()
